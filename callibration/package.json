@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "express": "^4.18.1",
+    "serialport": "^11.0.0",
+    "socket.io": "^4.7.1"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}

@@ -1,0 +1,2 @@
+To use Uno R4's WiFi connection, update the firmware by following the instruction:
+https://forum.arduino.cc/t/radio-module-firmware-version-0-2-0-is-now-available/1147361

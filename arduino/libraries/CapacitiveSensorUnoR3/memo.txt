@@ -1,0 +1,5 @@
+For Arduino Uno R3, download and use CapacitiveSensor Library provided by Paul Bagder:
+
+https://github.com/PaulStoffregen/CapacitiveSensor
+http://www.pjrc.com/teensy/td_libs_CapacitiveSensor.html
+http://playground.arduino.cc/Main/CapacitiveSensor

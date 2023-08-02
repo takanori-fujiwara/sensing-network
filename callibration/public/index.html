@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      margin: 1em;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+  </style>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script> -->
+  <script src="./js/libraries/socket.io@4.7.1"></script>
+  <script src="./js/libraries/vega@5.25.0"></script>
+  <script src="./js/libraries/vega-lite@5.12.0"></script>
+  <script src="./js/libraries/vega-embed@6.22.1"></script>
+</head>
+
+<body>
+  <b>1. Collect and process data</b>
+  <p id="currentCollectingNode">Press Start to collect data</p>
+  <label for="nNodes"># of nodes:</label>
+  <input id="nNodesInput" name="nNodes" type="number" value="20" min="1" max="1000"></input>
+  <button id="collectionStartButton">Start</button>
+  <br />
+  <div id="vis" style="height: 250px;"></div>
+  <hr>
+  <b>2. Node selection demo (after finishing 1)</b>
+  <p id="selectedNode" style="font-size: x-large;">Press Start</p>
+  <button id="demoStartButton">Start</button>
+</body>
+<script src="./js/main.js" type="module"></script>
+
+</html>
