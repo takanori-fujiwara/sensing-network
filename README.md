@@ -36,7 +36,7 @@ Installation
   * Browser supporting JavaScript ES2015(ES6) and WebGL 2.0
   * Internet connection (to access D3 and 3d-force-graph library)
 
-* For `calibration``: 
+* For `calibration`: 
   * Browser supporting JavaScript ES2015(ES6)
   * Node.js (latest)
   * Internet connection
