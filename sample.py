@@ -55,7 +55,7 @@ sample_networks = {
 }
 
 if __name__ == '__main__':
-    network = sample_networks['usage_scenario']
+    network = sample_networks['simple']
     nodes = network['nodes']
     links = network['links']
     links.sort()
@@ -84,8 +84,7 @@ if __name__ == '__main__':
                            link_radius=result['link_radius'],
                            outfile_path='./network_renderer/data/nw.json')
 
-    output_to_json(outfile_path='./grasshopper_script/data/cad_data.json',
-                   **result)
+    output_to_json(outfile_path='./result/cad_data.json', **result)
 
     import threading
     import webbrowser

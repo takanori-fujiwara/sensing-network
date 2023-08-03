@@ -1,4 +1,5 @@
 import json
+import os
 import re
 
 import numpy as np
@@ -56,6 +57,8 @@ def output_to_json(nodes,
     }
 
     if outfile_path is not None:
+        if not os.path.exists(os.path.dirname(outfile_path)):
+            os.makedirs(os.path.dirname(outfile_path))
         with open(outfile_path, 'w') as f:
             json.dump(info, f)
 
@@ -95,6 +98,8 @@ def output_to_3dforce_json(nodes,
         })
 
     if outfile_path is not None:
+        if not os.path.exists(os.path.dirname(outfile_path)):
+            os.makedirs(os.path.dirname(outfile_path))
         with open(outfile_path, 'w') as f:
             json.dump(network, f)
 
@@ -262,7 +267,7 @@ class LcapyCircuitSimplifier():
 def to_ngspice_circuit_text(nodes,
                             links,
                             resistances,
-                            outfile=None,
+                            outfile_path=None,
                             in_node=None,
                             out_node=None,
                             touch_node=None,
@@ -284,8 +289,10 @@ def to_ngspice_circuit_text(nodes,
                              arduino_inner_resistance=arduino_inner_resistance,
                              voltage_value=voltage_value)
 
-    if outfile is not None:
-        with open(outfile, 'w') as f:
+    if outfile_path is not None:
+        if not os.path.exists(os.path.dirname(outfile_path)):
+            os.makedirs(os.path.dirname(outfile_path))
+        with open(outfile_path, 'w') as f:
             f.write(cir.str())
 
     return cir.str()
@@ -341,7 +348,7 @@ def to_ngspice_circuit(nodes,
 def to_ltspice_drawing_text(nodes,
                             links,
                             resistances,
-                            outfile=None,
+                            outfile_path=None,
                             scale_factor=5,
                             in_node=None,
                             out_node=None,
@@ -447,8 +454,10 @@ def to_ltspice_drawing_text(nodes,
 
     ltspice_text = header_text + Rs_text + Ws_text + V_text + C_text
 
-    if outfile is not None:
-        with open(outfile, 'w') as f:
+    if outfile_path is not None:
+        if not os.path.exists(os.path.dirname(outfile_path)):
+            os.makedirs(os.path.dirname(outfile_path))
+        with open(outfile_path, 'w') as f:
             f.write(ltspice_text)
 
     return ltspice_text
@@ -503,7 +512,6 @@ def _layout_resistors(nodes, links):
     ##     pygraphviz
     ## pip3 install graphviz
     import graphviz
-    import os
 
     # This is to avoid overlapping resistors due to LTSpice's spec
     fnodes, flinks = _flip_nodes_links(nodes, links)
@@ -533,8 +541,8 @@ def _layout_resistors(nodes, links):
 
     # need to output dot format file to get node positions, etc
     dot_file_name = 'tmp.dot'
-    with open(dot_file_name, 'wb') as output_file:
-        output_file.write(dot_text)
+    with open(dot_file_name, 'wb') as f:
+        f.write(dot_text)
 
     resistors = nx.drawing.nx_agraph.read_dot(dot_file_name).nodes
     os.remove(dot_file_name)

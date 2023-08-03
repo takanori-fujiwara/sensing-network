@@ -103,9 +103,15 @@ How to build a sensing network
     - Launching: `npm start` and then access to the indicated ip address from a Web browser
   - Note: Capacitive sensing is sensitive to various external conditions, such as human capacitance and environments (materials of a table where a network is placed). How to mitigate or effectively deal with this problem is remaining as future work.   
 
-### License
+******
+License
+-----
+
 See License.txt (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License. Copyright: Takanori Fujiwara and S. Sandra Bae.)
 
-### How to cite
+******
+How to cite
+-----
+
 S. Sandra Bae, Takanori Fujiwara, Anders Ynnerman, Ellen Yi-Luen Do, Michael L. Rivera, and Danielle Albers Szafir, "A Computational Design Pipeline to Fabricate Sensing Network Physicalizations." IEEE Transactions on Visualization and Computer Graphics, forthcoming.
 
