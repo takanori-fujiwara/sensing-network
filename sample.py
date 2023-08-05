@@ -1,6 +1,6 @@
 import numpy as np
 from sensing_network.pipeline import default_pipeline
-from sensing_network.convert_utils import output_to_3dforce_json, output_to_json
+from sensing_network.convert_utils import output_to_3dforce_json, output_to_json, output_to_stl
 
 
 def generate_random_network(n_nodes=10, n_links=20):
@@ -75,7 +75,7 @@ if __name__ == '__main__':
                                   'vertical_resistivity': 930.0,
                                   'horizontal_resistivity': 570.0
                               },
-                              use_out_node=False)
+                              use_out_node=True)
 
     output_to_3dforce_json(nodes,
                            links,
@@ -85,6 +85,7 @@ if __name__ == '__main__':
                            outfile_path='./network_renderer/data/nw.json')
 
     output_to_json(outfile_path='./result/cad_data.json', **result)
+    output_to_stl(outfile_path='./result/stl_data', **result)
 
     import threading
     import webbrowser

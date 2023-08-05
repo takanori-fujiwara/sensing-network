@@ -86,9 +86,19 @@ How to build a sensing network
         'resistors_v_boxes': Vertical boxes (z-direction thick lines) for the resistor embedding.
 
 2. From the above information, generate STL files for 3D printing.
-  - We are planning to provide source code that does not require any commercial CAD software to generate STL files.
+  - output_to_stl (see sample.py) can convert the above information to a set of STL files
+    - *.node.stl: STL files for nodes (for conductive material)
+    - *.link.stl: STL files for links (for non-conductive material)
+    - *.resistor.stl: STL files for resistors (for conductive material)
+  - Or you can use output_to_json (see sample.py) to output the above information as a json file and use it to produce STL files with any CAD software (e.g., Rhino CAD with Grasshopper)
+    - For the networks shown in our paper, we used Rhino CAD to make STL files more suitabel for 3D printing (e.g., making slight blank spaces around the boundaries of link and resistor objects).
+    - We are planning to provide our grasshopper script.
 
 3. Print a network using conductive (for nodes and resistor embedding) and non-conductive materials.
+  - For example, you can use [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer/) for this preparation.
+    - Node objects (*.node.stl): conductive materials, any infill density (e.g., 20%)
+    - Link objects (*.link.stl): non-conductive materials, high infill density (e.g., 90%)
+    - Resistor objects (*.resistor.stl): conductive materials, very high infill density (e.g., 100%)
 
 4. Build an electric circuit with Arduino Uno R4
   - Connect a resistor with large resistence (e.g., 1M ohm) to a Send pin of the Arduino and 'in_node'

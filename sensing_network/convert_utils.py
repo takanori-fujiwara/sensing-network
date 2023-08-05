@@ -5,6 +5,9 @@ import re
 import numpy as np
 import networkx as nx
 import lcapy
+import pyvista as pv
+
+from functools import reduce
 
 
 def to_nxgraph(nodes, links, link_weights=None):
@@ -21,6 +24,171 @@ def to_nxgraph(nodes, links, link_weights=None):
         nx.set_edge_attributes(G, weight_dict, 'weight')
 
     return G
+
+
+def line_to_cylinder(p0, p1, radius, resolution=100, capping=True):
+    return pv.Cylinder(radius=radius,
+                       center=(p1 + p0) / 2,
+                       direction=p1 - p0,
+                       height=np.linalg.norm(p1 - p0),
+                       resolution=resolution,
+                       capping=capping).triangulate()
+
+
+def line_to_cone(p0, p1, radius, resolution=100, capping=True):
+    return pv.Cone(radius=radius,
+                   center=(p1 + p0) / 2,
+                   direction=p1 - p0,
+                   height=np.linalg.norm(p1 - p0),
+                   resolution=resolution,
+                   capping=capping).triangulate()
+
+
+def line_to_box(p0, p1, extrude_dir1, extrude_dir2, width, capping=True):
+    u1 = extrude_dir1 / np.linalg.norm(extrude_dir1)
+    u2 = extrude_dir2 / np.linalg.norm(extrude_dir2)
+    p0_ = p0 - (u1 + u2) * width / 2
+    p1_ = p1 - (u1 + u2) * width / 2
+    return pv.Line(p0_, p1_).extrude(u1 * width, capping=capping).extrude(
+        u2 * width, capping=capping).triangulate()
+
+
+def combine_polydata_objects(objects):
+
+    def combine(obj1, obj2):
+        return obj1.append_polydata(obj2)
+
+    return reduce(combine, objects)
+
+
+def output_to_stl(nodes,
+                  links,
+                  node_positions,
+                  node_radius=12.5,
+                  link_radius=3.15,
+                  resistor_links=[],
+                  resistances=[],
+                  in_node=None,
+                  out_node=None,
+                  resistors_h_paths=[],
+                  resistors_v_boxes=[],
+                  sphere_resolution=60,
+                  link_cone_radius=None,
+                  resistors_h_paths_width=0.5,
+                  resistors_v_boxes_width=1.0,
+                  in_out_nodes_cylinder_width=2,
+                  in_out_nodes_cylinder_height=6,
+                  outfile_path=None):
+    '''
+    Output STL files with all necessary meshes to build a sensing physicalized network
+    '''
+    node_positions_ = np.array(node_positions)[np.argsort(nodes)]
+
+    # nodes
+    node_objects = [
+        pv.Sphere(radius=node_radius,
+                  center=pos,
+                  theta_resolution=sphere_resolution,
+                  phi_resolution=sphere_resolution) for pos in node_positions_
+    ]
+
+    # links
+    link_objects = [
+        line_to_cylinder(node_positions_[s], node_positions_[t], link_radius)
+        for s, t in links
+    ]
+    # add cone shapes for structural support
+    if link_cone_radius is None:
+        link_cone_radius = min(link_radius * 2, node_radius)
+    if link_cone_radius > link_radius:
+        for s, t in links:
+            pos1 = node_positions_[s]
+            pos2 = node_positions_[t]
+            center_pos = (pos1 + pos2) / 2
+            link_objects += [
+                line_to_cone(pos1, center_pos, link_cone_radius),
+                line_to_cone(pos2, center_pos, link_cone_radius)
+            ]
+
+    # resisor paths
+    # 1. horizontal paths (thin)
+    h_path_objects = []
+    for h_paths in resistors_h_paths:
+        for h_path in h_paths:
+            h_path = np.array(h_path)
+            for i in range(1, len(h_path)):
+                mag = np.linalg.norm(h_path[i] - h_path[i - 1])
+                if mag > 0:
+                    u = (h_path[i] - h_path[i - 1]) / mag
+                    u_z = np.array([0, 0, 1])
+                    u_xy = np.cross(u, u_z)
+                    pos1 = h_path[i - 1] - u * resistors_h_paths_width / 2
+                    pos2 = h_path[i] + u * resistors_h_paths_width / 2
+                    h_path_object = line_to_box(pos1, pos2, u_xy, u_z,
+                                                resistors_h_paths_width)
+                    h_path_objects.append(h_path_object)
+
+    # 2. vertical paths (thicker)
+    v_path_objects = []
+    for v_boxes, (s, t) in zip(resistors_v_boxes, resistor_links):
+        for v_box in v_boxes:
+            box_center = np.array(v_box).mean(axis=0)
+            pos1 = np.array([box_center[0], box_center[1], v_box[0][2]])
+            pos2 = np.array([box_center[0], box_center[1], v_box[1][2]])
+            if np.linalg.norm(pos1 - pos2) > 0:
+                vec_nodes = node_positions_[t] - node_positions_[s]
+                u_z = np.array([0, 0, 1])
+                u_xy1 = np.array([vec_nodes[0], vec_nodes[1], 0])
+                u_xy2 = -np.cross(u_z, u_xy1)
+                v_path_object = line_to_box(pos1, pos2, u_xy1, u_xy2,
+                                            resistors_v_boxes_width)
+                v_path_objects.append(v_path_object)
+
+    # 3. input and output points
+    in_out_node_objects = []
+    for in_out_node in [in_node, out_node]:
+        if in_out_node is not None:
+            # make a cylinder along a direction opposite from connected links
+            related_links = []
+            for s, t in links:
+                if in_out_node == s:
+                    related_links.append([s, t])
+                elif in_out_node == t:
+                    related_links.append([t, s])
+
+            mean_vec = np.array([
+                node_positions_[t] - node_positions_[s]
+                for s, t in related_links
+            ]).mean(axis=0)
+            if (np.linalg.norm(mean_vec) == 0) or (np.isnan(
+                    np.linalg.norm(mean_vec))):
+                mean_vec = np.array([1, 0, 0])
+            mean_vec /= np.linalg.norm(mean_vec)
+
+            pos1 = node_positions_[in_out_node]
+            pos2 = node_positions_[in_out_node] - (
+                node_radius + in_out_nodes_cylinder_height) * mean_vec
+            in_out_node_object = line_to_cylinder(pos1, pos2,
+                                                  in_out_nodes_cylinder_width)
+            in_out_node_objects.append(in_out_node_object)
+
+    # 4. combine all
+    resistor_objects = h_path_objects + v_path_objects + in_out_node_objects
+
+    node_stl = combine_polydata_objects(node_objects)
+    link_stl = combine_polydata_objects(link_objects)
+    resistor_stl = combine_polydata_objects(resistor_objects)
+
+    if outfile_path is not None:
+        dirname = os.path.dirname(outfile_path)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        basename = os.path.basename(outfile_path).split('.')[0]
+        node_stl.save(f'{dirname}/{basename}.node.stl')
+        link_stl.save(f'{dirname}/{basename}.link.stl')
+        resistor_stl.save(f'{dirname}/{basename}.resistor.stl')
+
+    return node_stl, link_stl, resistor_stl
 
 
 def output_to_json(nodes,

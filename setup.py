@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='sensing_network',
-      version=0.6,
+      version=0.7,
       package_dir={'': '.'},
       install_requires=[
           'numpy',
@@ -13,6 +13,7 @@ setup(name='sensing_network',
           'pathos',
           'lcapy',
           'sympy',
+          'pyvista',
       ],
       py_modules=[
           'sensing_network.convert_utils',
