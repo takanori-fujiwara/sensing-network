@@ -46,8 +46,8 @@ class ResistorPathGenerator():
 
         # avoid overlapping with nodes
         u = (target_pos - source_pos) / np.linalg.norm(target_pos - source_pos)
-        source_pos += self.node_r * u + self.margin
-        target_pos -= self.node_r * u + self.margin
+        source_pos += (self.node_r + self.margin) * u
+        target_pos -= (self.node_r + self.margin) * u
 
         return source_pos, target_pos
 
