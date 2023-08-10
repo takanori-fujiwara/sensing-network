@@ -1,3 +1,12 @@
+
+/*
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
+All rights reserved.
+*/
+
 // For more options, check: https://github.com/vasturiano/3d-force-graph/
 export const draw = (data, {
   targetDom = '3d-network',

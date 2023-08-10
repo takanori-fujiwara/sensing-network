@@ -1,6 +1,11 @@
 /*
 CapacitiveSensorR4.cpp and CapacitiveSensorR4.h
-Copyright (c) 2023 Takanori Fujiwara and S. Sandra Bae
+
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
+All rights reserved.
 
 The library is built by referring to CapacitiveSensor Libary (Copyright (c) 2009 Paul Bagder)
 https://github.com/PaulStoffregen/CapacitiveSensor

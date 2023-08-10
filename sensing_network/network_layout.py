@@ -1,3 +1,11 @@
+'''
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
+All rights reserved.
+'''
+
 import networkx as nx
 import numpy as np
 from sensing_network.convert_utils import to_nxgraph

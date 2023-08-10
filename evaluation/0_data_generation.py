@@ -1,3 +1,11 @@
+'''
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
+All rights reserved.
+'''
+
 # This code requires graph-tool
 # Follow installation instructions (only supporting macOS and Linux): https://graph-tool.skewed.de/
 # Note: brew installed graph_tool only supports Python3.11

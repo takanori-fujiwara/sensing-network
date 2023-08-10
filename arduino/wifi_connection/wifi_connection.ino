@@ -1,5 +1,10 @@
 /*
-Copyright (c) 2023 Takanori Fujiwara and S. Sandra Bae
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
+All rights reserved.
+
 This source code is created by referring to the examples available here:
 https://docs.arduino.cc/tutorials/uno-r4-wifi/wifi-examples
 */
