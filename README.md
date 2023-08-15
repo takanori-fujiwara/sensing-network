@@ -3,10 +3,13 @@
 About
 -----
 
-* Source code to generate a sensing network physicalization introduced in **A Computational Design Pipeline to Fabricate Sensing Network Physicalizations**, S. Sandra Bae, Takanori Fujiwara, Anders Ynnerman, Ellen Yi-Luen Do, Michael L. Rivera, and Danielle Albers Szafir.
+* Source code to generate a sensing network physicalization introduced in **[A Computational Design Pipeline to Fabricate Sensing Network Physicalizations](https://arxiv.org/abs/2308.04714)**, S. Sandra Bae, Takanori Fujiwara, Anders Ynnerman, Ellen Yi-Luen Do, Michael L. Rivera, and Danielle Albers Szafir.
 IEEE Transactions on Visualization and Computer Graphics and IEEE VIS 2023, forthcoming.
 
-* Demonstration video: will be released soon.
+* Links:
+  * [Project page](https://sandrabae.github.io/sensing-network/)
+  * [Demo video](https://www.youtube.com/watch?v=WE5tL6YWOTs)
+  * [arXiv paper](https://arxiv.org/abs/2308.04714)
 
 ******
 
@@ -43,13 +46,11 @@ Installation
 
 * Note: Tested with macOS Ventura, Arduino Uno R4 WiFi, and Google Chrome.
 
-### Setup
+### Setup of sensing-network python module
 
-* Download/Clone this repository
+* Install from PyPi:
 
-* Move to the downloaded repository, then:
-
-    `pip3 install .` or `python3 -m pip install .`
+    `pip3 install sensing-network`
 
 
 ******
