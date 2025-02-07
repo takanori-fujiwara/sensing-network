@@ -1,3 +1,6 @@
+.venv/
+venv/
+
 *.npy
 *.json
 !package.json
