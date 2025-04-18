@@ -4,7 +4,7 @@ About
 -----
 
 * Source code to generate a sensing network physicalization introduced in **[A Computational Design Pipeline to Fabricate Sensing Network Physicalizations](https://arxiv.org/abs/2308.04714)**, S. Sandra Bae, Takanori Fujiwara, Anders Ynnerman, Ellen Yi-Luen Do, Michael L. Rivera, and Danielle Albers Szafir.
-IEEE Transactions on Visualization and Computer Graphics and IEEE VIS 2023, forthcoming.
+IEEE Transactions on Visualization and Computer Graphics, vol. 30, no. 1, pp. 913-923, Jan. 2024 (also, proc. IEEE VIS 2023).
 
 * Links:
   * [Project page](https://sandrabae.github.io/sensing-network/)
@@ -44,7 +44,7 @@ Installation
   * Node.js (latest)
   * Internet connection
 
-* Note: Tested with macOS Ventura, Arduino Uno R4 WiFi, and Google Chrome.
+* Note: Tested with macOS Sequoia, Arduino Uno R4 WiFi, and Google Chrome.
 
 ### Setup of sensing-network python module
 
@@ -128,5 +128,5 @@ See License.txt (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 Inter
 How to cite
 -----
 
-S. Sandra Bae, Takanori Fujiwara, Anders Ynnerman, Ellen Yi-Luen Do, Michael L. Rivera, and Danielle Albers Szafir, "A Computational Design Pipeline to Fabricate Sensing Network Physicalizations." IEEE Transactions on Visualization and Computer Graphics, forthcoming.
+S. Sandra Bae, Takanori Fujiwara, Anders Ynnerman, Ellen Yi-Luen Do, Michael L. Rivera, and Danielle Albers Szafir, "A Computational Design Pipeline to Fabricate Sensing Network Physicalizations." IEEE Transactions on Visualization and Computer Graphics, vol. 30, no. 1, pp. 913-923, 2024.
 
