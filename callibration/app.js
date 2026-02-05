@@ -33,7 +33,7 @@ const findSerialPortPath = SerialPort.list().then(ports => {
   // dynamically find the port path
   let portPath = null;
   ports.forEach(port => {
-    if (port.path.includes("/dev/tty.usbmodem" || "/dev/cu.usbmodem")) {
+    if (port.path.includes("/dev/ttyUSB0")) {
       portPath = port.path;
     }
   });
@@ -80,7 +80,7 @@ findSerialPortPath.then(serialPortPath => {
     socket.on('io', data => {
       if (serialPort) {
         parser.on('data', capValue => {
-          console.log(capValue); // show data on terminal
+          //console.log(capValue); // show data on terminal
           io.emit('data', {
             capValue: capValue,
             connectType: serialPort ? 'serial' : 'tcp/ip'
@@ -110,6 +110,12 @@ findSerialPortPath.then(serialPortPath => {
 
     socket.on('endProcessing', jsonData => {
       fs.writeFileSync('./public/data/config.json', jsonData, 'utf8');
+    });
+
+    socket.on('saveDemoData', jsonData => {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      fs.writeFileSync(`./public/data/demo_data_${timestamp}.json`, jsonData, 'utf8');
+      console.log(`Demo data saved to demo_data_${timestamp}.json`);
     });
   });
 
