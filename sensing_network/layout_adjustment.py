@@ -1,10 +1,10 @@
-'''
+"""
 Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
 https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 
 Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
 All rights reserved.
-'''
+"""
 
 import numpy as np
 from sklearn.decomposition import PCA
@@ -16,32 +16,32 @@ from torch.utils.data import Dataset, DataLoader
 import pytorch_lightning as pl
 
 
-class LayoutAdjustment():
+class LayoutAdjustment:
 
     def __init__(
-            self,
-            link_radius,
-            node_radius,
-            ref_node_positions=None,
-            non_intersect_prior_links=None,
-            n_components=3,
-            encoder=None,
-            learning_rate=1e-3,
-            batch_size=None,
-            loss_weights={
-                'layout_change': 0,
-                'prior_link_intersect': 0,
-                'link_intersect': 0,
-                'node_intersect': 0,
-                'link_length_variation': 0
-            },
-            device='cpu'):
+        self,
+        link_radius,
+        node_radius,
+        ref_node_positions=None,
+        non_intersect_prior_links=None,
+        n_components=3,
+        encoder=None,
+        learning_rate=1e-3,
+        batch_size=None,
+        loss_weights={
+            "layout_change": 0,
+            "prior_link_intersect": 0,
+            "link_intersect": 0,
+            "node_intersect": 0,
+            "link_length_variation": 0,
+        },
+        device="cpu",
+    ):
         self.link_radius = link_radius
         self.node_radius = node_radius
         self.ref_node_positions = ref_node_positions
         if isinstance(self.ref_node_positions, np.ndarray):
-            self.ref_node_positions = torch.from_numpy(
-                ref_node_positions).float()
+            self.ref_node_positions = torch.from_numpy(ref_node_positions).float()
         self.non_intersect_prior_links = non_intersect_prior_links
         self.n_components = n_components
         self.encoder = encoder
@@ -57,13 +57,12 @@ class LayoutAdjustment():
         I = torch.eye(len(nodes))
         dataset = CustomDataset(torch.Tensor(links).long())
 
-        trainer = pl.Trainer(accelerator=self.device,
-                             devices='auto',
-                             max_epochs=max_epochs)
+        trainer = pl.Trainer(
+            accelerator=self.device, devices="auto", max_epochs=max_epochs
+        )
 
         if self.encoder is None:
-            self.encoder = DefaultEncoder(len(nodes),
-                                          n_components=self.n_components)
+            self.encoder = DefaultEncoder(len(nodes), n_components=self.n_components)
 
         self.model = Model(
             learning_rate=self.learning_rate,
@@ -74,10 +73,10 @@ class LayoutAdjustment():
             I=I,
             ref_node_positions=self.ref_node_positions,
             non_intersect_prior_links=self.non_intersect_prior_links,
-            loss_weights=self.loss_weights)
+            loss_weights=self.loss_weights,
+        )
 
-        trainer.fit(model=self.model,
-                    datamodule=DataModule(dataset, self.batch_size))
+        trainer.fit(model=self.model, datamodule=DataModule(dataset, self.batch_size))
 
     @torch.no_grad()
     def transform(self, nodes, axes_adjustment=True):
@@ -89,8 +88,9 @@ class LayoutAdjustment():
             # reasoning: along 3rd PC direction/height-direction,
             #            variance/position differences would be smallest
             pca = PCA(n_components=3)
-            node_positions = pca.fit_transform(node_positions -
-                                               node_positions.mean(axis=0))
+            node_positions = pca.fit_transform(
+                node_positions - node_positions.mean(axis=0)
+            )
 
         return node_positions
 
@@ -104,10 +104,12 @@ class DataModule(pl.LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         # num_workers should be 0 as we are accessing to one array/tensor
-        return DataLoader(dataset=self.dataset,
-                          batch_size=self.batch_size,
-                          num_workers=0,
-                          drop_last=True)
+        return DataLoader(
+            dataset=self.dataset,
+            batch_size=self.batch_size,
+            num_workers=0,
+            drop_last=True,
+        )
 
 
 class CustomDataset(Dataset):
@@ -125,20 +127,22 @@ class CustomDataset(Dataset):
 
 class Model(pl.LightningModule):
 
-    def __init__(self,
-                 learning_rate,
-                 encoder,
-                 link_radius,
-                 node_radius,
-                 I,
-                 ref_node_positions,
-                 non_intersect_prior_links,
-                 loss_weights,
-                 device='cpu'):
+    def __init__(
+        self,
+        learning_rate,
+        encoder,
+        link_radius,
+        node_radius,
+        I,
+        ref_node_positions,
+        non_intersect_prior_links,
+        loss_weights,
+        device="cpu",
+    ):
         super().__init__()
 
-        if device == 'auto':
-            self._device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        if device == "auto":
+            self._device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
             self._device = device
 
@@ -161,48 +165,67 @@ class Model(pl.LightningModule):
         loss = Loss(self._device)
 
         layout_change_loss = 0
-        if self.loss_weights.get('layout_change') and (self.ref_node_positions
-                                                       is not None):
-            layout_change_loss = loss.layout_change_loss(
-                node_positions, ref_node_positions=self.ref_node_positions
-            ) * self.loss_weights['layout_change']
+        if self.loss_weights.get("layout_change") and (
+            self.ref_node_positions is not None
+        ):
+            layout_change_loss = (
+                loss.layout_change_loss(
+                    node_positions, ref_node_positions=self.ref_node_positions
+                )
+                * self.loss_weights["layout_change"]
+            )
 
         prior_link_intersect_loss = 0
-        if self.loss_weights.get('prior_link_intersect') and (
-                self.non_intersect_prior_links is not None):
-            prior_link_intersect_loss = loss.link_intersection_loss(
-                self.non_intersect_prior_links,
-                link_radius=self.link_radius,
-                node_radius=self.node_radius,
-                node_positions=node_positions
-            ) * self.loss_weights['prior_link_intersect']
+        if self.loss_weights.get("prior_link_intersect") and (
+            self.non_intersect_prior_links is not None
+        ):
+            prior_link_intersect_loss = (
+                loss.link_intersection_loss(
+                    self.non_intersect_prior_links,
+                    link_radius=self.link_radius,
+                    node_radius=self.node_radius,
+                    node_positions=node_positions,
+                )
+                * self.loss_weights["prior_link_intersect"]
+            )
 
         link_intersect_loss = 0
-        if self.loss_weights.get('link_intersect'):
-            link_intersect_loss = loss.link_intersection_loss(
-                links,
-                link_radius=self.link_radius,
-                node_radius=self.node_radius,
-                node_positions=node_positions
-            ) * self.loss_weights['link_intersect']
+        if self.loss_weights.get("link_intersect"):
+            link_intersect_loss = (
+                loss.link_intersection_loss(
+                    links,
+                    link_radius=self.link_radius,
+                    node_radius=self.node_radius,
+                    node_positions=node_positions,
+                )
+                * self.loss_weights["link_intersect"]
+            )
 
         node_intersect_loss = 0
-        if self.loss_weights.get('node_intersect'):
-            node_intersect_loss = loss.node_intesection_loss(
-                node_positions, node_radius=self.node_radius
-            ) * self.loss_weights['node_intersect']
+        if self.loss_weights.get("node_intersect"):
+            node_intersect_loss = (
+                loss.node_intesection_loss(node_positions, node_radius=self.node_radius)
+                * self.loss_weights["node_intersect"]
+            )
 
         link_length_variation_loss = 0
-        if self.loss_weights.get('link_length_variation'):
-            link_length_variation_loss = loss.link_length_variation_loss(
-                links, node_positions=node_positions
-            ) * self.loss_weights['link_length_variation']
+        if self.loss_weights.get("link_length_variation"):
+            link_length_variation_loss = (
+                loss.link_length_variation_loss(links, node_positions=node_positions)
+                * self.loss_weights["link_length_variation"]
+            )
 
         # non_horizontal_loss = loss.non_horizontal_loss(node_positions)
 
-        encoder_loss = layout_change_loss + prior_link_intersect_loss + link_intersect_loss + node_intersect_loss + link_length_variation_loss
+        encoder_loss = (
+            layout_change_loss
+            + prior_link_intersect_loss
+            + link_intersect_loss
+            + node_intersect_loss
+            + link_length_variation_loss
+        )
 
-        self.log('loss', encoder_loss, prog_bar=True)
+        self.log("loss", encoder_loss, prog_bar=True)
 
         return encoder_loss
 
@@ -226,15 +249,14 @@ class DefaultEncoder(nn.Module):
         return self.encoder(x)
 
 
-class Loss():
+class Loss:
 
-    def __init__(self, device='cpu'):
+    def __init__(self, device="cpu"):
         self.device = device
 
-    def layout_change_loss(self,
-                           node_positions,
-                           ref_node_positions,
-                           loss_fn=F.huber_loss):
+    def layout_change_loss(
+        self, node_positions, ref_node_positions, loss_fn=F.huber_loss
+    ):
         # translation/centering
         P_ref = ref_node_positions - ref_node_positions.mean(axis=0)
         P = node_positions - node_positions.mean(axis=0)
@@ -255,13 +277,9 @@ class Loss():
 
         return loss
 
-    def links_intersected(self,
-                          link1,
-                          link2,
-                          link_radius,
-                          node_radius,
-                          node_positions,
-                          eps=1e-16):
+    def links_intersected(
+        self, link1, link2, link_radius, node_radius, node_positions, eps=1e-16
+    ):
         # See http://paulbourke.net/geometry/pointlineplane/ to know details
         p0_ = node_positions[link1[0]]
         p1_ = node_positions[link1[1]]
@@ -283,39 +301,35 @@ class Loss():
         d3232 = ((p3 - p2) * (p3 - p2)).sum()
         d1010 = ((p1 - p0) * (p1 - p0)).sum()
 
-        mua = (d0232 * d3210 - d0210 * d3232) / (d1010 * d3232 -
-                                                 d3210 * d3210 + eps)
+        mua = (d0232 * d3210 - d0210 * d3232) / (d1010 * d3232 - d3210 * d3210 + eps)
         mub = (d0232 + mua * d3210) / (d3232 + eps)
 
         # limit in the line length
         # should be 0 <= mua, mub <=1
-        mua = torch.min(torch.Tensor([1.0]), torch.max(torch.Tensor([0.0]),
-                                                       mua))
-        mub = torch.min(torch.Tensor([1.0]), torch.max(torch.Tensor([0.0]),
-                                                       mub))
+        mua = torch.min(torch.Tensor([1.0]), torch.max(torch.Tensor([0.0]), mua))
+        mub = torch.min(torch.Tensor([1.0]), torch.max(torch.Tensor([0.0]), mub))
         pa = p0 + mua * (p1 - p0)
         pb = p2 + mub * (p3 - p2)
         dist = (pa - pb).norm()
 
         return F.relu(link_radius * 2 - dist)  # if dist > link_radius * 2: 0
 
-    def link_intersection_loss(self,
-                               links,
-                               link_radius,
-                               node_radius,
-                               node_positions,
-                               eps=1e-16):
+    def link_intersection_loss(
+        self, links, link_radius, node_radius, node_positions, eps=1e-16
+    ):
         loss = 0
         for i in range(len(links)):
             link1 = links[i]
             for j in range(i + 1, len(links)):
                 link2 = links[j]
-                loss += self.links_intersected(link1,
-                                               link2,
-                                               link_radius=link_radius,
-                                               node_radius=node_radius,
-                                               node_positions=node_positions,
-                                               eps=eps)
+                loss += self.links_intersected(
+                    link1,
+                    link2,
+                    link_radius=link_radius,
+                    node_radius=node_radius,
+                    node_positions=node_positions,
+                    eps=eps,
+                )
 
         return loss
 
@@ -329,9 +343,7 @@ class Loss():
             s_pos = node_positions[i]
             for j in range(i + 1, len(node_positions)):
                 t_pos = node_positions[j]
-                loss += self.nodes_intersected(s_pos,
-                                               t_pos,
-                                               node_radius=node_radius)
+                loss += self.nodes_intersected(s_pos, t_pos, node_radius=node_radius)
 
         return loss
 
@@ -348,7 +360,7 @@ class Loss():
         return loss
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # four node graphlet example
     nodes = [0, 1, 2, 3]
     links = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]
@@ -357,20 +369,25 @@ if __name__ == '__main__':
     node_radius = 8.5  # 8.5mm
     mean_link_length = 50
 
-    la = LayoutAdjustment(link_radius=link_radius,
-                          node_radius=node_radius,
-                          n_components=3,
-                          batch_size=len(links),
-                          loss_weights={
-                              'link_intersect': 1,
-                              'node_intersect': 1,
-                              'link_length_variation': 1
-                          })
+    la = LayoutAdjustment(
+        link_radius=link_radius,
+        node_radius=node_radius,
+        n_components=3,
+        batch_size=len(links),
+        loss_weights={
+            "link_intersect": 1,
+            "node_intersect": 1,
+            "link_length_variation": 1,
+        },
+    )
     la.fit(nodes, links, max_epochs=500)
 
     node_positions = la.transform(nodes)
-    node_positions *= mean_link_length / np.array([
-        np.linalg.norm(node_positions[s] - node_positions[t]) for s, t in links
-    ]).mean()
+    node_positions *= (
+        mean_link_length
+        / np.array(
+            [np.linalg.norm(node_positions[s] - node_positions[t]) for s, t in links]
+        ).mean()
+    )
 
     print(node_positions)

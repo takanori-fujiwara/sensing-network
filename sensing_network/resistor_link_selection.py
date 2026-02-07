@@ -1,30 +1,28 @@
-'''
+"""
 Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
 https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 
 Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
 All rights reserved.
-'''
+"""
 
 import numpy as np
 import networkx as nx
 from sensing_network.convert_utils import to_nxgraph
 
 
-def select_resistor_links(nodes,
-                          links,
-                          link_weights=None,
-                          G=None,
-                          exact='auto',
-                          n_permutations=100):
+def select_resistor_links(
+    nodes, links, link_weights=None, G=None, exact="auto", n_permutations=100
+):
     if G is None:
         G = to_nxgraph(nodes, links, link_weights)
-    if exact == 'auto':
+    if exact == "auto":
         exact = True if len(G.nodes()) < 6 else False
 
-    if len(nx.get_edge_attributes(G, 'weight')) > 0:
+    if len(nx.get_edge_attributes(G, "weight")) > 0:
         node_order, _ = _floyd_warshall_node_visits(
-            G, exact=exact, n_permutations=n_permutations)
+            G, exact=exact, n_permutations=n_permutations
+        )
         resistor_links = _node_order_to_links_in_shortestpath(G, node_order)
     else:
         # complexity: O(V) * O(V + E)
@@ -39,7 +37,7 @@ def select_resistor_links(nodes,
 
         node_order = []
         for s, t in resistor_links:
-            if (len(node_order) == 0):
+            if len(node_order) == 0:
                 node_order.append(s)
             node_order.append(t)
 
@@ -80,6 +78,7 @@ def _floyd_warshall_node_visits(G, exact=False, n_permutations=100):
     if exact:
         # check all possible permutations/node orders
         import itertools
+
         for path in itertools.permutations(range(n_nodes)):
             dist = node_order_to_dist(path)
             if dist < best_dist:
@@ -116,7 +115,7 @@ def _node_order_to_links_in_shortestpath(G, node_order):
     return list(G_sub.edges())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # four node graphlet example
     nodes = [0, 1, 2, 3]
     links = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]

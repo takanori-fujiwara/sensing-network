@@ -1,30 +1,32 @@
-'''
+"""
 Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
 https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 
 Copyright (c) 2023, Takanori Fujiwara and S. Sandra Bae
 All rights reserved.
-'''
+"""
 
 import numpy as np
 
 
-class ResistorPathGenerator():
+class ResistorPathGenerator:
 
-    def __init__(self,
-                 resistance,
-                 node1_pos,
-                 node2_pos,
-                 link_radius,
-                 node_radius,
-                 vertical_step=0.6,
-                 path_margin=0.55,
-                 vertical_box_width=0.8,
-                 vertical_box_additional_height=0.4,
-                 min_node_link_overlap=3.0,
-                 vertical_resistivity=2100.0,
-                 horizontal_resistivity=890.0,
-                 verbose=False):
+    def __init__(
+        self,
+        resistance,
+        node1_pos,
+        node2_pos,
+        link_radius,
+        node_radius,
+        vertical_step=0.6,
+        path_margin=0.55,
+        vertical_box_width=0.8,
+        vertical_box_additional_height=0.4,
+        min_node_link_overlap=3.0,
+        vertical_resistivity=2100.0,
+        horizontal_resistivity=890.0,
+        verbose=False,
+    ):
         self.resistance = resistance
         self.link_r = link_radius
         self.node_r = node_radius
@@ -38,7 +40,8 @@ class ResistorPathGenerator():
         self.verbose = verbose
 
         self.s_pos, self.t_pos = self._select_source_target_positions(
-            node1_pos, node2_pos)
+            node1_pos, node2_pos
+        )
         self._prepare_geom_info()
         self.start_z, self.end_z = self._find_start_end_zcoords()
 
@@ -66,7 +69,9 @@ class ResistorPathGenerator():
 
         # info of ellipse appeared when cutting a link along a horizontal direciton
         self.ellipse_a = self.link_r  # shorter side
-        self.ellipse_b = self.ellipse_a * self.dist / self.v_dist if self.v_dist > 0 else None  # longer side
+        self.ellipse_b = (
+            self.ellipse_a * self.dist / self.v_dist if self.v_dist > 0 else None
+        )  # longer side
 
         # info of a rectangle inside of the ellipse, which has the maximum area
         self.rect_a = self.ellipse_a * np.sqrt(2.0)
@@ -87,18 +92,18 @@ class ResistorPathGenerator():
         self.u_b = b_unit_vec
 
         # to know when we can use full ellipse
-        self.s_zbounds = np.array([
-            self.s_pos[2] -
-            self.link_r * self.dist / max(self.h_dist, self.v_dist),
-            self.s_pos[2] +
-            self.link_r * self.dist / max(self.h_dist, self.v_dist)
-        ])
-        self.t_zbounds = np.array([
-            self.t_pos[2] -
-            self.link_r * self.dist / max(self.h_dist, self.v_dist),
-            self.t_pos[2] +
-            self.link_r * self.dist / max(self.h_dist, self.v_dist)
-        ])
+        self.s_zbounds = np.array(
+            [
+                self.s_pos[2] - self.link_r * self.dist / max(self.h_dist, self.v_dist),
+                self.s_pos[2] + self.link_r * self.dist / max(self.h_dist, self.v_dist),
+            ]
+        )
+        self.t_zbounds = np.array(
+            [
+                self.t_pos[2] - self.link_r * self.dist / max(self.h_dist, self.v_dist),
+                self.t_pos[2] + self.link_r * self.dist / max(self.h_dist, self.v_dist),
+            ]
+        )
 
         # u = (self.t_pos - self.s_pos) / self.dist
         # self.s_zbounds = np.array([(self.s_pos - self.node_r * u)[2] -
@@ -113,14 +118,10 @@ class ResistorPathGenerator():
         return self
 
     def _find_start_end_zcoords(self):
-        min_z = self.s_pos[2] - self.v_dist * (self.link_r -
-                                               self.margin) / self.dist
-        max_z = self.t_pos[2] + self.v_dist * (self.link_r -
-                                               self.margin) / self.dist
-        min_z = self.s_pos[2] - self.v_dist * (self.link_r -
-                                               self.margin) / self.dist
-        max_z = self.t_pos[2] + self.v_dist * (self.link_r -
-                                               self.margin) / self.dist
+        min_z = self.s_pos[2] - self.v_dist * (self.link_r - self.margin) / self.dist
+        max_z = self.t_pos[2] + self.v_dist * (self.link_r - self.margin) / self.dist
+        min_z = self.s_pos[2] - self.v_dist * (self.link_r - self.margin) / self.dist
+        max_z = self.t_pos[2] + self.v_dist * (self.link_r - self.margin) / self.dist
 
         # to handle the case a link is close to horizontal
         # (2 * self.margin: taking a slightly wider margin)
@@ -148,11 +149,15 @@ class ResistorPathGenerator():
             u = (self.t_pos - self.s_pos) / self.dist
             u_orth = np.array((u[2], -u[0], -u[2]))
 
-            s_face_pos = self.s_pos + u_orth * (
-                center_z - self.s_pos[2]) * self.v_dist / self.h_dist
+            s_face_pos = (
+                self.s_pos
+                + u_orth * (center_z - self.s_pos[2]) * self.v_dist / self.h_dist
+            )
             s_face_pos[2] = center_z
-            t_face_pos = self.t_pos + u_orth * (
-                center_z - self.t_pos[2]) * self.v_dist / self.h_dist
+            t_face_pos = (
+                self.t_pos
+                + u_orth * (center_z - self.t_pos[2]) * self.v_dist / self.h_dist
+            )
             t_face_pos[2] = center_z
 
             if np.dot(t_face_pos[:2] - layer_center[:2], u[:2]) > 0:
@@ -163,23 +168,27 @@ class ResistorPathGenerator():
             # start[1] = end[1] - np.linalg.norm(
             #     self.t_pos - self.s_pos) * self.dist / self.h_dist
 
-            if (self.v_dist > 0) and (center_z - self.t_zbounds[0]
-                                      < self.margin):
+            if (self.v_dist > 0) and (center_z - self.t_zbounds[0] < self.margin):
                 end[1] -= self.margin * self.h_dist / self.v_dist
-            if (self.v_dist > 0) and (self.s_zbounds[1] - center_z
-                                      < self.margin):
+            if (self.v_dist > 0) and (self.s_zbounds[1] - center_z < self.margin):
                 start[1] += self.margin * self.h_dist / self.v_dist
             # if self.v_dist > 0:
             #     end[1] -= self.margin * self.h_dist / self.v_dist
             #     start[1] += self.margin * self.h_dist / self.v_dist
 
         elif center_z < self.s_zbounds[1]:
-            till_s_face = self.rect_b * (center_z - self.s_zbounds[0]) / (
-                self.s_zbounds[1] - self.s_zbounds[0])
+            till_s_face = (
+                self.rect_b
+                * (center_z - self.s_zbounds[0])
+                / (self.s_zbounds[1] - self.s_zbounds[0])
+            )
             start[1] = end[1] - till_s_face
         elif center_z > self.t_zbounds[0]:
-            till_t_face = self.rect_b * (center_z - self.t_zbounds[0]) / (
-                self.t_zbounds[1] - self.t_zbounds[0])
+            till_t_face = (
+                self.rect_b
+                * (center_z - self.t_zbounds[0])
+                / (self.t_zbounds[1] - self.t_zbounds[0])
+            )
             end[1] = end[1] - till_t_face
             # till_t_face = self.rect_b * (self.t_zbounds[1] - center_z) / (
             #     self.t_zbounds[1] - self.t_zbounds[0])
@@ -190,8 +199,7 @@ class ResistorPathGenerator():
 
         return np.array(start), np.array(end)
 
-    def _path_start_end_for_odd_layers(self, layer_center, prev_end,
-                                       next_start):
+    def _path_start_end_for_odd_layers(self, layer_center, prev_end, next_start):
         # i = i, 3, 5, 7, 9...
         center_z = layer_center[2]
         h_for_v_step = 0
@@ -266,10 +274,13 @@ class ResistorPathGenerator():
             t_u_h[:2] = (t_pos_[:2] - layer_path_end[:2]) / t_h
         t_u_v = np.array((0, 0, 1)) if t_v > 0 else np.array((0, 0, -1))
 
-        t_hlines = [[
-            layer_path_end, layer_path_end + t_dh * t_u_h / 2,
-            layer_path_end + t_dh * t_u_h
-        ]]
+        t_hlines = [
+            [
+                layer_path_end,
+                layer_path_end + t_dh * t_u_h / 2,
+                layer_path_end + t_dh * t_u_h,
+            ]
+        ]
         t_vlines = []
         for _ in range(int(abs(t_v) / self.v_step) + 1):
             p0 = t_hlines[-1][-1]
@@ -299,7 +310,7 @@ class ResistorPathGenerator():
     def _compress_h_path(self, h_path):
         compressed_h_path = []
         for p in h_path:
-            if (len(compressed_h_path) == 0):
+            if len(compressed_h_path) == 0:
                 compressed_h_path.append(p)
             else:
                 if not np.all(p == compressed_h_path[-1]):
@@ -307,15 +318,13 @@ class ResistorPathGenerator():
         return compressed_h_path
 
     def generate_path(self, convert_to_v_box=True):
-        layer_zs = np.arange(self.start_z, self.end_z + self.v_step,
-                             self.v_step)
+        layer_zs = np.arange(self.start_z, self.end_z + self.v_step, self.v_step)
 
         layer_centers = []
         for z in layer_zs:
             center = (self.s_pos + self.t_pos) / 2
             if self.v_dist > 0:
-                center = center + self.u_b * self.h_dist * (
-                    z - center[2]) / self.v_dist
+                center = center + self.u_b * self.h_dist * (z - center[2]) / self.v_dist
             center[2] = z
             layer_centers.append(center)
 
@@ -332,20 +341,22 @@ class ResistorPathGenerator():
                 if i < len(layer_centers) - 1:
                     next_start = starts_ends[i + 1][0]
                 starts_ends[i] = self._path_start_end_for_odd_layers(
-                    center, prev_end, next_start)
+                    center, prev_end, next_start
+                )
 
         total_v_resist = self.v_dist * self.v_resist
         aiming_total_h_resist = self.resistance - total_v_resist
 
         # compute delta of total_h_resist when zigzag_a increases 1
         total_h_resist0 = self._compute_total_h_resist(
-            [self._generate_layer_path(s, e, 0) for s, e in starts_ends])
+            [self._generate_layer_path(s, e, 0) for s, e in starts_ends]
+        )
         total_h_resist1 = self._compute_total_h_resist(
-            [self._generate_layer_path(s, e, 1) for s, e in starts_ends])
+            [self._generate_layer_path(s, e, 1) for s, e in starts_ends]
+        )
         delta_total_h_resist = total_h_resist1 - total_h_resist0
 
-        zigzag_a = (aiming_total_h_resist -
-                    total_h_resist0) / delta_total_h_resist
+        zigzag_a = (aiming_total_h_resist - total_h_resist0) / delta_total_h_resist
         zigzag_a = min(zigzag_a, self.rect_a - self.margin)
         if zigzag_a < 0.5:
             if (zigzag_a - 0.0) < (0.5 - zigzag_a):
@@ -354,7 +365,7 @@ class ResistorPathGenerator():
                 zigzag_a = 0.5
 
         if self.verbose:
-            print('zigzag_a', zigzag_a)
+            print("zigzag_a", zigzag_a)
 
         layer_paths = [
             self._generate_layer_path(s, e, zigzag_a) for s, e in starts_ends
@@ -363,8 +374,8 @@ class ResistorPathGenerator():
 
         total_resist = total_h_resist + total_v_resist
         if self.verbose and (abs(self.resistance - total_resist) > 500):
-            print('specified resistance was not able to be produced.')
-            print(f'aimed: {self.resistance}, actual: {total_resist}')
+            print("specified resistance was not able to be produced.")
+            print(f"aimed: {self.resistance}, actual: {total_resist}")
 
         h_paths = []
         for center, path in zip(layer_centers, layer_paths):
@@ -383,8 +394,7 @@ class ResistorPathGenerator():
             higher_layer_start = h_paths[i + 1][0]
             v_lines.append([current_layer_end, higher_layer_start])
 
-        s_hlines, s_vlines, t_hlines, t_vlines = self._generate_path_from_node(
-            h_paths)
+        s_hlines, s_vlines, t_hlines, t_vlines = self._generate_path_from_node(h_paths)
         h_paths = s_hlines + h_paths + t_hlines
         v_lines = s_vlines + v_lines + t_vlines
 
@@ -401,7 +411,8 @@ class ResistorPathGenerator():
                 v_lines,
                 v_line_adjusts,
                 width=self.vbox_width,
-                additional_height=self.vbox_additional_height)
+                additional_height=self.vbox_additional_height,
+            )
 
         return h_paths, v_lines, total_resist
 
@@ -410,8 +421,7 @@ class ResistorPathGenerator():
         p0 = line.min(axis=0)
         p1 = line.max(axis=0)
 
-        diff = np.array([1, 0, 0]) * width / 2 + np.array([0, 1, 0
-                                                           ]) * width / 2
+        diff = np.array([1, 0, 0]) * width / 2 + np.array([0, 1, 0]) * width / 2
         p0 -= np.abs(diff)
         p1 += np.abs(diff)
         p0[2] -= additional_height / 2
@@ -419,32 +429,31 @@ class ResistorPathGenerator():
 
         return [p0.tolist(), p1.tolist()]
 
-    def vertical_lines_to_boxes(self,
-                                lines,
-                                pos_adjusts,
-                                width=0.8,
-                                additional_height=0.4):
+    def vertical_lines_to_boxes(
+        self, lines, pos_adjusts, width=0.8, additional_height=0.4
+    ):
         return [
-            self.vertical_line_to_box(line,
-                                      p_adjust,
-                                      width=width,
-                                      additional_height=additional_height)
+            self.vertical_line_to_box(
+                line, p_adjust, width=width, additional_height=additional_height
+            )
             for line, p_adjust in zip(lines, pos_adjusts)
         ]
 
 
-def generate_all_paths(node_positions,
-                       resistor_links,
-                       resistances,
-                       link_radius=3.15,
-                       node_radius=8.5,
-                       vertical_step=0.6,
-                       path_margin=0.55,
-                       vertical_box_width=0.8,
-                       vertical_box_additional_height=0.4,
-                       min_node_link_overlap=5.0,
-                       vertical_resistivity=2100.0,
-                       horizontal_resistivity=890.0):
+def generate_all_paths(
+    node_positions,
+    resistor_links,
+    resistances,
+    link_radius=3.15,
+    node_radius=8.5,
+    vertical_step=0.6,
+    path_margin=0.55,
+    vertical_box_width=0.8,
+    vertical_box_additional_height=0.4,
+    min_node_link_overlap=5.0,
+    vertical_resistivity=2100.0,
+    horizontal_resistivity=890.0,
+):
     all_h_paths = []
     all_v_boxes = []
     for resistor_link, resistance in zip(resistor_links, resistances):
@@ -463,12 +472,12 @@ def generate_all_paths(node_positions,
             vertical_box_additional_height=vertical_box_additional_height,
             min_node_link_overlap=min_node_link_overlap,
             vertical_resistivity=vertical_resistivity,
-            horizontal_resistivity=horizontal_resistivity)
+            horizontal_resistivity=horizontal_resistivity,
+        )
         h_paths, v_boxes, total_resist = generator.generate_path()
 
         adjusted_v_step = vertical_step * 2
-        while abs(resistance -
-                  total_resist) > 500 and adjusted_v_step < link_radius:
+        while abs(resistance - total_resist) > 500 and adjusted_v_step < link_radius:
             # try doubled vertical step
             generator = ResistorPathGenerator(
                 resistance,
@@ -482,21 +491,21 @@ def generate_all_paths(node_positions,
                 vertical_box_additional_height=vertical_box_additional_height,
                 min_node_link_overlap=min_node_link_overlap,
                 vertical_resistivity=vertical_resistivity,
-                horizontal_resistivity=horizontal_resistivity)
+                horizontal_resistivity=horizontal_resistivity,
+            )
             h_paths_, v_boxes_, total_resist_ = generator.generate_path()
             adjusted_v_step *= 2
 
-            if abs(resistance - total_resist_) < abs(resistance -
-                                                     total_resist):
+            if abs(resistance - total_resist_) < abs(resistance - total_resist):
                 h_paths = h_paths_
                 v_boxes = v_boxes_
                 total_resist = total_resist_
 
         if abs(resistance - total_resist) > 1000:
             print(
-                f'For Link {resistor_link}, specified resistance was not able to be produced.'
+                f"For Link {resistor_link}, specified resistance was not able to be produced."
             )
-            print(f'aimed: {resistance}, actual: {total_resist}')
+            print(f"aimed: {resistance}, actual: {total_resist}")
 
         all_h_paths.append(h_paths)
         all_v_boxes.append(v_boxes)
@@ -504,7 +513,7 @@ def generate_all_paths(node_positions,
     return all_h_paths, all_v_boxes
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # positions are in mm
     nodes = [0, 1, 2, 3]
@@ -513,7 +522,7 @@ if __name__ == '__main__':
         [21.90741539001465, -9.782852172851562, -6.341604232788086],
         [-18.3528995513916, -15.735390663146973, -5.31614351272583],
         [-0.02511332742869854, 4.449100017547607, 23.544418334960938],
-        [-3.5293960571289062, 21.069141387939453, -11.886672019958496]
+        [-3.5293960571289062, 21.069141387939453, -11.886672019958496],
     ]
     node_radius = 8.5
     link_radius = 3.15
@@ -527,7 +536,8 @@ if __name__ == '__main__':
         resistor_links=resistor_links,
         resistances=resistances,
         node_radius=node_radius,
-        link_radius=link_radius)
+        link_radius=link_radius,
+    )
 
-    print('horizontal paths:', all_h_paths)
-    print('vertical boxes:', all_v_boxes)
+    print("horizontal paths:", all_h_paths)
+    print("vertical boxes:", all_v_boxes)
