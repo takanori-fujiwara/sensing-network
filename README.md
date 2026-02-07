@@ -27,7 +27,7 @@ Installation
 -----
 
 ### Requirements
-* Python3 (< 3.13: pytorch doesn't support 3.13 yet)
+* Python3 (< 3.14: pyvista doesn't support 3.14 yet)
 
 * For `arduino`:
   * Arduino Uno R4 (Uno R3 is available after minor changes)
@@ -52,10 +52,6 @@ Installation
 
     `pip3 install sensing-network`
 
-    * NOTE: Due to pytorch's implementation issue, numpy>=2.0 cannot be used.
-      If encountered error, run:
-      
-        `pip3 install "numpy<2"`
 
 ******
 
