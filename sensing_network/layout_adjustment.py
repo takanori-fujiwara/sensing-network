@@ -236,7 +236,7 @@ class DefaultEncoder(nn.Module):
         super(DefaultEncoder, self).__init__()
         self.encoder = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(np.product(dims), hidden_size),
+            nn.Linear(np.prod(dims), hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
